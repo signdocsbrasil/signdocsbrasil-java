@@ -1,0 +1,6 @@
+target/
+*.class
+*.jar
+!src/**/resources/*.jar
+.idea/
+*.iml

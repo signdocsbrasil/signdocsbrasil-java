@@ -1,0 +1,3 @@
+# Exclude from git archive / release tarballs
+src/test/        export-ignore
+.gitattributes   export-ignore
