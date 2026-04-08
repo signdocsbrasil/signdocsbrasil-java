@@ -61,7 +61,6 @@ class ResourcesCoverageTest {
 
         SignDocsBrasilClient client = createClient();
         CreateEnvelopeRequest req = new CreateEnvelopeRequest();
-        req.setMode("PARALLEL");
         Envelope env = client.envelopes().create(req);
         assertEquals("env_1", env.getEnvelopeId());
     }
