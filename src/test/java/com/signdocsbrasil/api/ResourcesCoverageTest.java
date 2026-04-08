@@ -462,7 +462,7 @@ class ResourcesCoverageTest {
                 .setHeader("Content-Type", "application/json"));
 
         SignDocsBrasilClient client = createClient();
-        Webhook[] webhooks = client.webhooks().list();
+        Object webhooks = client.webhooks().list();
         assertNotNull(webhooks);
     }
 
