@@ -564,6 +564,183 @@ class ResourcesCoverageTest {
         assertNotNull(resp);
     }
 
+    // ── Transactions create overloads ──────────────────────────
+
+    @Test
+    void transactionsCreateWithIdempotencyKey() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"transactionId\":\"tx_1\",\"status\":\"CREATED\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        Transaction tx = client.transactions().create(new CreateTransactionRequest(), "idem-1");
+        assertEquals("tx_1", tx.getTransactionId());
+    }
+
+    @Test
+    void transactionsCreateWithIdempotencyAndTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"transactionId\":\"tx_1\",\"status\":\"CREATED\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        Transaction tx = client.transactions().create(new CreateTransactionRequest(), "idem-1", Duration.ofSeconds(5));
+        assertEquals("tx_1", tx.getTransactionId());
+    }
+
+    @Test
+    void transactionsListWithParamsAndTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"transactions\":[],\"nextCursor\":null}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        TransactionListParams params = new TransactionListParams();
+        params.setStatus("COMPLETED");
+        TransactionListResponse resp = client.transactions().list(params, Duration.ofSeconds(5));
+        assertNotNull(resp);
+    }
+
+    // ── Documents upload with timeout ──────────────────────────
+
+    @Test
+    void documentsUploadWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"transactionId\":\"tx_1\",\"documentHash\":\"sha256-abc\",\"status\":\"DOCUMENT_UPLOADED\",\"uploadedAt\":\"2026-04-08T00:00:00Z\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        DocumentUploadResponse resp = client.documents().upload("tx_1", new UploadDocumentRequest(), Duration.ofSeconds(5));
+        assertEquals("tx_1", resp.getTransactionId());
+    }
+
+    @Test
+    void documentsConfirmWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"transactionId\":\"tx_1\",\"status\":\"CONFIRMED\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        ConfirmDocumentResponse resp = client.documents().confirm("tx_1", new ConfirmDocumentRequest(), Duration.ofSeconds(5));
+        assertNotNull(resp);
+    }
+
+    // ── Steps start/complete overloads ──────────────────────────
+
+    @Test
+    void stepsStartWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"stepId\":\"s1\",\"status\":\"STARTED\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        StartStepResponse resp = client.steps().start("tx_1", "s1", null, Duration.ofSeconds(5));
+        assertNotNull(resp);
+    }
+
+    @Test
+    void stepsCompleteWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"stepId\":\"s1\",\"type\":\"CLICK_ACCEPT\",\"status\":\"COMPLETED\",\"attempts\":1}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        StepCompleteResponse resp = client.steps().complete("tx_1", "s1", null, Duration.ofSeconds(5));
+        assertNotNull(resp);
+    }
+
+    // ── Webhooks timeout + missing overloads ────────────────────
+
+    @Test
+    void webhooksRegisterWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"webhookId\":\"wh_1\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        RegisterWebhookResponse resp = client.webhooks().register(new RegisterWebhookRequest(), Duration.ofSeconds(5));
+        assertNotNull(resp);
+    }
+
+    @Test
+    void webhooksDeleteWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse().setResponseCode(204));
+
+        SignDocsBrasilClient client = createClient();
+        client.webhooks().delete("wh_1", Duration.ofSeconds(5));
+    }
+
+    @Test
+    void webhooksListWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("[{\"webhookId\":\"wh_1\"}]")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        Object result = client.webhooks().list(Duration.ofSeconds(5));
+        assertNotNull(result);
+    }
+
+    @Test
+    void webhooksTestWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"success\":true}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        WebhookTestResponse resp = client.webhooks().test("wh_1", Duration.ofSeconds(5));
+        assertNotNull(resp);
+    }
+
+    // ── SigningSessions create overloads ─────────────────────────
+
+    @Test
+    void signingSessionsCreateWithIdempotencyKey() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"sessionId\":\"sess_1\",\"transactionId\":\"tx_1\",\"status\":\"ACTIVE\",\"url\":\"https://sign.example.com\",\"clientSecret\":\"cs_1\",\"expiresAt\":\"2026-04-10T00:00:00Z\",\"createdAt\":\"2026-04-08T00:00:00Z\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        SigningSession sess = client.signingSessions().create(new CreateSigningSessionRequest(), "idem-1");
+        assertEquals("sess_1", sess.getSessionId());
+    }
+
+    @Test
+    void signingSessionsCreateWithTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"sessionId\":\"sess_1\",\"transactionId\":\"tx_1\",\"status\":\"ACTIVE\",\"url\":\"https://sign.example.com\",\"clientSecret\":\"cs_1\",\"expiresAt\":\"2026-04-10T00:00:00Z\",\"createdAt\":\"2026-04-08T00:00:00Z\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        SigningSession sess = client.signingSessions().create(new CreateSigningSessionRequest(), Duration.ofSeconds(5));
+        assertEquals("sess_1", sess.getSessionId());
+    }
+
+    @Test
+    void signingSessionsCreateWithIdempotencyAndTimeout() {
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"sessionId\":\"sess_1\",\"transactionId\":\"tx_1\",\"status\":\"ACTIVE\",\"url\":\"https://sign.example.com\",\"clientSecret\":\"cs_1\",\"expiresAt\":\"2026-04-10T00:00:00Z\",\"createdAt\":\"2026-04-08T00:00:00Z\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        SignDocsBrasilClient client = createClient();
+        SigningSession sess = client.signingSessions().create(new CreateSigningSessionRequest(), "idem-1", Duration.ofSeconds(5));
+        assertEquals("sess_1", sess.getSessionId());
+    }
+
     @Test
     void documentGroupsCombinedStampWithTimeout() {
         enqueueToken();
