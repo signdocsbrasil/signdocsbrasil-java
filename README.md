@@ -13,16 +13,16 @@ SDK oficial em Java para a API SignDocsBrasil.
 
 ```xml
 <dependency>
-    <groupId>com.signdocsbrasil</groupId>
+    <groupId>io.github.signdocsbrasil</groupId>
     <artifactId>signdocsbrasil-api</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation 'com.signdocsbrasil:signdocsbrasil-api:1.1.0'
+implementation 'io.github.signdocsbrasil:signdocsbrasil-api:1.2.0'
 ```
 
 ## Início Rápido

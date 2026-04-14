@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-14
+
+### Added
+
+- `client.verification().verifyEnvelope(envelopeId)` — public method for the new `GET /v1/verify/envelope/{envelopeId}` endpoint. Returns envelope status, signers list (each with `evidenceId` for drill-down via `verification().verify()`), and consolidated download URLs.
+- `EnvelopeVerificationResponse` model with nested `EnvelopeSigner` and `Downloads` types. For non-PDF envelopes signed with digital certificates, `downloads.getConsolidatedSignature()` exposes a single PKCS#7 / CMS detached `.p7s` containing every signer's `SignerInfo`. For PDF envelopes, `downloads.getCombinedSignedPdf()` exposes the merged PDF.
+- `VerificationResponse.VerificationSigner.getCpfCnpj()` and `VerificationResponse.getTenantCnpj()` getters (previously returned by the API but not modeled by the SDK).
+- `VerificationDownloadsResponse.Downloads.getOriginalDocument()` and `getSignedSignature()` getters (previously undocumented), matching the real shape the API returns.
+
+### Changed
+
+- `VerificationDownloadsResponse.Downloads.getSignedSignature()` returns `null` when the evidence belongs to a multi-signer envelope (the API omits the field). For standalone signing sessions (single-signer non-PDF with digital certificate) the field is still populated. To retrieve the consolidated `.p7s` for an envelope, use `client.verification().verifyEnvelope()` instead.
+
+### Fixed
+
+- README install instructions pointed at `com.signdocsbrasil:signdocsbrasil-api` (wrong groupId that does not resolve). The actual Maven Central coordinates are `io.github.signdocsbrasil:signdocsbrasil-api`. README now matches `pom.xml`.
+
+### Removed
+
+- `VerificationDownloadsResponse.Downloads.getSignedPdf()` — the field was modeled by the SDK but never actually returned by the API. No real-world consumer could have depended on it.
+
 ## [1.1.0] - 2026-03-27
 
 ### Added
