@@ -38,6 +38,9 @@ public class VerificationResponse {
     @SerializedName("tenantName")
     private String tenantName;
 
+    @SerializedName("tenantCnpj")
+    private String tenantCnpj;
+
     @SerializedName("createdAt")
     private String createdAt;
 
@@ -127,6 +130,14 @@ public class VerificationResponse {
         this.tenantName = tenantName;
     }
 
+    public String getTenantCnpj() {
+        return tenantCnpj;
+    }
+
+    public void setTenantCnpj(String tenantCnpj) {
+        this.tenantCnpj = tenantCnpj;
+    }
+
     public String getCreatedAt() {
         return createdAt;
     }
@@ -150,12 +161,23 @@ public class VerificationResponse {
         @SerializedName("displayName")
         private String displayName;
 
+        @SerializedName("cpfCnpj")
+        private String cpfCnpj;
+
         public String getDisplayName() {
             return displayName;
         }
 
         public void setDisplayName(String displayName) {
             this.displayName = displayName;
+        }
+
+        public String getCpfCnpj() {
+            return cpfCnpj;
+        }
+
+        public void setCpfCnpj(String cpfCnpj) {
+            this.cpfCnpj = cpfCnpj;
         }
     }
 

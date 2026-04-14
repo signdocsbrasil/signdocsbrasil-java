@@ -34,16 +34,35 @@ public class VerificationDownloadsResponse {
 
     /**
      * Container for download artifacts.
+     *
+     * <p>{@code signedSignature} is the detached PKCS#7 / CMS ({@code .p7s})
+     * for digital-cert signing of non-PDF documents. It is only populated by
+     * the API for <strong>standalone signing sessions</strong> (single-signer);
+     * it is omitted entirely from the response when the evidence belongs to a
+     * multi-signer envelope. Use
+     * {@link com.signdocsbrasil.api.resources.VerificationResource#verifyEnvelope}
+     * to retrieve the consolidated envelope-level {@code .p7s} instead.
      */
     public static class Downloads {
+        @SerializedName("originalDocument")
+        private DownloadArtifact originalDocument;
+
         @SerializedName("evidencePack")
         private DownloadArtifact evidencePack;
 
-        @SerializedName("signedPdf")
-        private DownloadArtifact signedPdf;
-
         @SerializedName("finalPdf")
         private DownloadArtifact finalPdf;
+
+        @SerializedName("signedSignature")
+        private DownloadArtifact signedSignature;
+
+        public DownloadArtifact getOriginalDocument() {
+            return originalDocument;
+        }
+
+        public void setOriginalDocument(DownloadArtifact originalDocument) {
+            this.originalDocument = originalDocument;
+        }
 
         public DownloadArtifact getEvidencePack() {
             return evidencePack;
@@ -53,20 +72,20 @@ public class VerificationDownloadsResponse {
             this.evidencePack = evidencePack;
         }
 
-        public DownloadArtifact getSignedPdf() {
-            return signedPdf;
-        }
-
-        public void setSignedPdf(DownloadArtifact signedPdf) {
-            this.signedPdf = signedPdf;
-        }
-
         public DownloadArtifact getFinalPdf() {
             return finalPdf;
         }
 
         public void setFinalPdf(DownloadArtifact finalPdf) {
             this.finalPdf = finalPdf;
+        }
+
+        public DownloadArtifact getSignedSignature() {
+            return signedSignature;
+        }
+
+        public void setSignedSignature(DownloadArtifact signedSignature) {
+            this.signedSignature = signedSignature;
         }
     }
 

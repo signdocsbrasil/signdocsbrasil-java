@@ -317,9 +317,10 @@ class MissingResourcesTest {
         server.enqueue(new MockResponse()
                 .setBody("{\"evidenceId\":\"ev_1\"," +
                         "\"downloads\":{" +
+                        "\"originalDocument\":{\"url\":\"https://s3/orig.pdf\",\"filename\":\"contrato.pdf\"}," +
                         "\"evidencePack\":{\"url\":\"https://s3/report.pdf\",\"filename\":\"evidence.p7m\"}," +
-                        "\"signedPdf\":{\"url\":\"https://s3/signed.pdf\",\"filename\":\"signed.pdf\"}," +
-                        "\"finalPdf\":{\"url\":\"https://s3/final.pdf\",\"filename\":\"final.pdf\"}" +
+                        "\"finalPdf\":{\"url\":\"https://s3/final.pdf\",\"filename\":\"final.pdf\"}," +
+                        "\"signedSignature\":{\"url\":\"https://s3/sig.p7s\",\"filename\":\"signature.p7s\"}" +
                         "}}")
                 .setHeader("Content-Type", "application/json"));
 
@@ -328,11 +329,58 @@ class MissingResourcesTest {
         assertNotNull(resp);
         assertEquals("ev_1", resp.getEvidenceId());
         assertNotNull(resp.getDownloads());
+        assertEquals("https://s3/orig.pdf", resp.getDownloads().getOriginalDocument().getUrl());
         assertEquals("https://s3/report.pdf", resp.getDownloads().getEvidencePack().getUrl());
-        assertEquals("https://s3/signed.pdf", resp.getDownloads().getSignedPdf().getUrl());
         assertEquals("https://s3/final.pdf", resp.getDownloads().getFinalPdf().getUrl());
+        assertEquals("https://s3/sig.p7s", resp.getDownloads().getSignedSignature().getUrl());
 
         RecordedRequest apiReq = server.takeRequest();
         assertNull(apiReq.getHeader("Authorization"));
+    }
+
+    @Test
+    void verificationVerifyEnvelopeNoAuthRequired() throws Exception {
+        SignDocsBrasilClient client = createClient();
+        server.enqueue(new MockResponse()
+                .setBody("{" +
+                        "\"envelopeId\":\"env_1\"," +
+                        "\"status\":\"COMPLETED\"," +
+                        "\"signingMode\":\"SEQUENTIAL\"," +
+                        "\"totalSigners\":2," +
+                        "\"completedSessions\":2," +
+                        "\"documentHash\":\"sha256:abc\"," +
+                        "\"tenantName\":\"Acme\"," +
+                        "\"tenantCnpj\":\"12345678000100\"," +
+                        "\"signers\":[" +
+                        "{\"signerIndex\":1,\"displayName\":\"João Silva\",\"cpfCnpj\":\"12345678901\",\"status\":\"COMPLETED\",\"evidenceId\":\"ev_a\",\"completedAt\":\"2026-04-13T18:00:00Z\"}," +
+                        "{\"signerIndex\":2,\"displayName\":\"Maria Souza\",\"status\":\"COMPLETED\",\"evidenceId\":\"ev_b\",\"completedAt\":\"2026-04-13T18:30:00Z\"}" +
+                        "]," +
+                        "\"downloads\":{" +
+                        "\"consolidatedSignature\":{\"url\":\"https://s3/envelope.p7s\",\"filename\":\"signature.p7s\"}" +
+                        "}," +
+                        "\"createdAt\":\"2026-04-13T17:00:00Z\"," +
+                        "\"completedAt\":\"2026-04-13T18:30:00Z\"" +
+                        "}")
+                .setHeader("Content-Type", "application/json"));
+
+        EnvelopeVerificationResponse resp = client.verification().verifyEnvelope("env_1");
+
+        assertNotNull(resp);
+        assertEquals("env_1", resp.getEnvelopeId());
+        assertEquals("SEQUENTIAL", resp.getSigningMode());
+        assertEquals(2, resp.getTotalSigners());
+        assertEquals(2, resp.getSigners().size());
+        assertEquals("João Silva", resp.getSigners().get(0).getDisplayName());
+        assertEquals("12345678901", resp.getSigners().get(0).getCpfCnpj());
+        assertEquals("ev_b", resp.getSigners().get(1).getEvidenceId());
+        assertNotNull(resp.getDownloads());
+        assertNotNull(resp.getDownloads().getConsolidatedSignature());
+        assertEquals("signature.p7s", resp.getDownloads().getConsolidatedSignature().getFilename());
+        assertNull(resp.getDownloads().getCombinedSignedPdf());
+
+        RecordedRequest apiReq = server.takeRequest();
+        assertNull(apiReq.getHeader("Authorization"));
+        assertEquals("GET", apiReq.getMethod());
+        assertEquals("/v1/verify/envelope/env_1", apiReq.getPath());
     }
 }
