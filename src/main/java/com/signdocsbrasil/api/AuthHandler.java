@@ -3,6 +3,10 @@ package com.signdocsbrasil.api;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.signdocsbrasil.api.errors.AuthenticationException;
+import com.signdocsbrasil.api.tokencache.CachedToken;
+import com.signdocsbrasil.api.tokencache.InMemoryTokenCache;
+import com.signdocsbrasil.api.tokencache.TokenCache;
+import com.signdocsbrasil.api.tokencache.TokenCacheKeys;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -16,18 +20,31 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Handles OAuth2 token acquisition and caching for the SignDocsBrasil API.
- * Supports both client_secret and private_key_jwt (ES256) authentication modes.
- * Thread-safe via ReentrantLock.
+ * Supports both {@code client_secret} and {@code private_key_jwt} (ES256)
+ * authentication modes.
+ *
+ * <p>Tokens are cached via a pluggable {@link TokenCache}. The default
+ * {@link InMemoryTokenCache} preserves the pre-1.3 behavior of caching
+ * in JVM memory. Short-lived hosts (serverless, Lambda, CLI) should
+ * inject a shared-store cache (Redis, Memcached, etc.) to avoid
+ * fetching a fresh token on every invocation.
+ *
+ * <p>Thread-safe via {@link ReentrantLock}: concurrent callers to
+ * {@link #getAccessToken()} will block while a refresh is in flight.
+ *
+ * <p>Non-{@code final} since 1.3.0. Subclassing is supported, but prefer
+ * injecting a custom cache over subclassing.
  */
-final class AuthHandler {
+class AuthHandler {
 
-    private static final long TOKEN_EXPIRY_BUFFER_SECONDS = 30;
+    private static final Duration TOKEN_EXPIRY_SKEW = Duration.ofSeconds(30);
     private static final Gson GSON = new Gson();
 
     private final String clientId;
@@ -37,10 +54,10 @@ final class AuthHandler {
     private final String tokenUrl;
     private final String scopeString;
     private final java.net.http.HttpClient httpClient;
+    private final TokenCache cache;
+    private final String cacheKey;
 
     private final ReentrantLock lock = new ReentrantLock();
-    private String cachedAccessToken;
-    private Instant cachedExpiresAt;
 
     AuthHandler(Config config) {
         this.clientId = config.getClientId();
@@ -52,11 +69,14 @@ final class AuthHandler {
         this.httpClient = java.net.http.HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
+        this.cache = config.getTokenCache() != null ? config.getTokenCache() : new InMemoryTokenCache();
+        this.cacheKey = TokenCacheKeys.derive(clientId, config.getBaseUrl(), config.getScopes());
     }
 
     /**
-     * Returns a valid access token, fetching a new one if the cached token is expired or absent.
-     * Thread-safe: concurrent callers will block while a token is being refreshed.
+     * Returns a valid access token, fetching a new one if the cached token
+     * is expired, near-expiry, or absent. Thread-safe: concurrent callers
+     * will block while a token is being refreshed.
      *
      * @return a valid Bearer access token
      * @throws AuthenticationException if the token request fails
@@ -64,14 +84,23 @@ final class AuthHandler {
     String getAccessToken() {
         lock.lock();
         try {
-            if (cachedAccessToken != null && cachedExpiresAt != null
-                    && Instant.now().isBefore(cachedExpiresAt.minusSeconds(TOKEN_EXPIRY_BUFFER_SECONDS))) {
-                return cachedAccessToken;
+            Optional<CachedToken> cached = cache.get(cacheKey);
+            if (cached.isPresent() && !cached.get().isExpired(Instant.now(), TOKEN_EXPIRY_SKEW)) {
+                return cached.get().getAccessToken();
             }
             return fetchToken();
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * Invalidate the cached token so that the next call to
+     * {@link #getAccessToken()} will fetch a fresh token from the
+     * authorization server.
+     */
+    void invalidate() {
+        cache.delete(cacheKey);
     }
 
     private String fetchToken() {
@@ -107,8 +136,8 @@ final class AuthHandler {
             String accessToken = json.get("access_token").getAsString();
             long expiresIn = json.get("expires_in").getAsLong();
 
-            this.cachedAccessToken = accessToken;
-            this.cachedExpiresAt = Instant.now().plusSeconds(expiresIn);
+            CachedToken cached = new CachedToken(accessToken, Instant.now().plusSeconds(expiresIn));
+            cache.set(cacheKey, cached);
 
             return accessToken;
         } catch (AuthenticationException e) {

@@ -1,9 +1,11 @@
 package com.signdocsbrasil.api;
 
 import com.signdocsbrasil.api.resources.*;
+import com.signdocsbrasil.api.tokencache.TokenCache;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Main entry point for the SignDocsBrasil API SDK.
@@ -287,6 +289,37 @@ public final class SignDocsBrasilClient {
          */
         public Builder logger(java.util.logging.Logger logger) {
             configBuilder.logger(logger);
+            return this;
+        }
+
+        /**
+         * Sets a pluggable {@link TokenCache} for OAuth2 access tokens.
+         * When null (default), a fresh
+         * {@link com.signdocsbrasil.api.tokencache.InMemoryTokenCache}
+         * is created. Supply a shared-store implementation for
+         * serverless / short-lived hosts that otherwise re-fetch a
+         * token on every invocation.
+         *
+         * @param cache the token cache (may be null to use default)
+         * @return this builder
+         */
+        public Builder tokenCache(TokenCache cache) {
+            configBuilder.tokenCache(cache);
+            return this;
+        }
+
+        /**
+         * Registers a callback invoked once per HTTP response the SDK
+         * receives. Useful for observability: surfacing
+         * {@code RateLimit-*}, {@code Deprecation}/{@code Sunset}, and
+         * upstream request IDs. Exceptions thrown from the callback are
+         * swallowed so that an observer bug cannot break SDK requests.
+         *
+         * @param callback the observer (may be null to disable)
+         * @return this builder
+         */
+        public Builder onResponse(Consumer<ResponseMetadata> callback) {
+            configBuilder.onResponse(callback);
             return this;
         }
 

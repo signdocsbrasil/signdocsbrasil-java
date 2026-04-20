@@ -15,6 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * HTTP client wrapper for the SignDocsBrasil API.
@@ -23,7 +25,7 @@ import java.util.UUID;
  */
 public final class HttpClient {
 
-    private static final String SDK_VERSION = "1.0.0";
+    private static final String SDK_VERSION = "1.3.0";
     private static final String USER_AGENT = "signdocs-brasil-java/" + SDK_VERSION;
 
     private final java.net.http.HttpClient client;
@@ -33,6 +35,7 @@ public final class HttpClient {
     private final RetryHandler retryHandler;
     private final Gson gson;
     private final java.util.logging.Logger logger;
+    private final Consumer<ResponseMetadata> onResponse;
 
     HttpClient(Config config, AuthHandler auth) {
         if (config.getHttpClient() != null) {
@@ -48,6 +51,7 @@ public final class HttpClient {
         this.retryHandler = new RetryHandler(config.getMaxRetries());
         this.gson = new GsonBuilder().create();
         this.logger = config.getLogger();
+        this.onResponse = config.getOnResponse();
     }
 
     /**
@@ -85,6 +89,10 @@ public final class HttpClient {
                     logger.info(logMessage);
                 }
             }
+
+            // Fire the response-metadata observer. Exceptions are swallowed
+            // so that an observer bug cannot break SDK requests.
+            notifyResponseObserver(response, method, path);
 
             // If retryable and not on last attempt, retry with backoff
             if (retryHandler.isRetryable(statusCode) && attempt < retryHandler.getMaxRetries()) {
@@ -173,6 +181,23 @@ public final class HttpClient {
 
     Gson getGson() {
         return gson;
+    }
+
+    private void notifyResponseObserver(HttpResponse<String> response, String method, String path) {
+        if (onResponse == null) {
+            return;
+        }
+        try {
+            ResponseMetadata metadata = ResponseMetadata.fromResponse(response, method, path);
+            onResponse.accept(metadata);
+        } catch (RuntimeException e) {
+            if (logger != null) {
+                logger.log(Level.WARNING, "onResponse callback threw: " + e.getMessage(), e);
+            } else {
+                System.getLogger(HttpClient.class.getName())
+                        .log(System.Logger.Level.WARNING, "onResponse callback threw: " + e.getMessage(), e);
+            }
+        }
     }
 
     private HttpResponse<String> executeRequest(String method, String path, Object body,

@@ -1,10 +1,13 @@
 package com.signdocsbrasil.api;
 
+import com.signdocsbrasil.api.tokencache.TokenCache;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Configuration for the SignDocsBrasil API client.
@@ -33,6 +36,8 @@ public final class Config {
     private final List<String> scopes;
     private final java.net.http.HttpClient httpClient;
     private final java.util.logging.Logger logger;
+    private final TokenCache tokenCache;
+    private final Consumer<ResponseMetadata> onResponse;
 
     private Config(Builder builder) {
         this.clientId = builder.clientId;
@@ -47,6 +52,8 @@ public final class Config {
                 : DEFAULT_SCOPES;
         this.httpClient = builder.httpClient;
         this.logger = builder.logger;
+        this.tokenCache = builder.tokenCache;
+        this.onResponse = builder.onResponse;
     }
 
     /**
@@ -114,6 +121,22 @@ public final class Config {
         return logger;
     }
 
+    /**
+     * Returns the custom token cache, or null if the default in-memory
+     * cache should be used.
+     */
+    public TokenCache getTokenCache() {
+        return tokenCache;
+    }
+
+    /**
+     * Returns the response-metadata callback, or null if no observer is
+     * configured.
+     */
+    public Consumer<ResponseMetadata> getOnResponse() {
+        return onResponse;
+    }
+
     public String getTokenUrl() {
         return baseUrl + "/oauth2/token";
     }
@@ -153,6 +176,8 @@ public final class Config {
         private List<String> scopes;
         private java.net.http.HttpClient httpClient;
         private java.util.logging.Logger logger;
+        private TokenCache tokenCache;
+        private Consumer<ResponseMetadata> onResponse;
 
         private Builder() {
         }
@@ -244,6 +269,40 @@ public final class Config {
          */
         public Builder logger(java.util.logging.Logger logger) {
             this.logger = logger;
+            return this;
+        }
+
+        /**
+         * Sets a pluggable {@link TokenCache} for OAuth2 access tokens.
+         * When null (default), a fresh {@link com.signdocsbrasil.api.tokencache.InMemoryTokenCache}
+         * is created. Supply a shared-store implementation (Redis,
+         * Memcached, etc.) for serverless / short-lived hosts that
+         * otherwise re-fetch a token on every invocation.
+         *
+         * @param cache the token cache (may be null to use default)
+         * @return this builder
+         */
+        public Builder tokenCache(TokenCache cache) {
+            this.tokenCache = cache;
+            return this;
+        }
+
+        /**
+         * Registers a callback invoked once per HTTP response the SDK
+         * receives (including both successful and error responses).
+         * Useful for observability: surfacing {@code RateLimit-*},
+         * {@code Deprecation}/{@code Sunset}, and upstream request IDs.
+         *
+         * <p>Exceptions thrown from the callback are swallowed so that an
+         * observer bug cannot break SDK requests. They are logged at
+         * {@link java.util.logging.Level#WARNING} when a logger is
+         * configured.
+         *
+         * @param callback the observer (may be null to disable)
+         * @return this builder
+         */
+        public Builder onResponse(Consumer<ResponseMetadata> callback) {
+            this.onResponse = callback;
             return this;
         }
 
