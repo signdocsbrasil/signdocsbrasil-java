@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] - 2026-04-20
 
+### Fixed
+
+- `WebhooksResource.list()` now correctly returns `List<Webhook>`. Previously Gson tried to deserialize the API's `{"webhooks":[...],"count":N}` envelope into `List<Webhook>` and threw `JsonSyntaxException: Expected BEGIN_OBJECT but was BEGIN_ARRAY`. The method now deserializes into an internal `WebhookListEnvelope` type and returns its inner list.
+
 ### Added
 
 - `com.signdocsbrasil.api.tokencache.TokenCache` — pluggable OAuth token cache interface. Inject via `SignDocsBrasilClient.builder().tokenCache(myCache)` to share tokens across serverless / short-lived workers. Default `InMemoryTokenCache` (backed by `ConcurrentHashMap`) preserves pre-1.3 single-JVM behavior.

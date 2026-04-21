@@ -458,7 +458,7 @@ class ResourcesCoverageTest {
     void webhooksList() {
         enqueueToken();
         server.enqueue(new MockResponse()
-                .setBody("[{\"webhookId\":\"wh_1\"}]")
+                .setBody("{\"webhooks\":[{\"webhookId\":\"wh_1\"}],\"count\":1}")
                 .setHeader("Content-Type", "application/json"));
 
         SignDocsBrasilClient client = createClient();
@@ -683,7 +683,7 @@ class ResourcesCoverageTest {
     void webhooksListWithTimeout() {
         enqueueToken();
         server.enqueue(new MockResponse()
-                .setBody("[{\"webhookId\":\"wh_1\"}]")
+                .setBody("{\"webhooks\":[{\"webhookId\":\"wh_1\"}],\"count\":1}")
                 .setHeader("Content-Type", "application/json"));
 
         SignDocsBrasilClient client = createClient();

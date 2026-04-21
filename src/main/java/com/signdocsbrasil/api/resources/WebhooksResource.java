@@ -1,5 +1,6 @@
 package com.signdocsbrasil.api.resources;
 
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import com.signdocsbrasil.api.HttpClient;
 import com.signdocsbrasil.api.models.RegisterWebhookRequest;
@@ -9,6 +10,7 @@ import com.signdocsbrasil.api.models.WebhookTestResponse;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,7 +18,20 @@ import java.util.List;
  */
 public final class WebhooksResource {
 
-    private static final Type WEBHOOK_LIST_TYPE = new TypeToken<List<Webhook>>() {}.getType();
+    private static final Type WEBHOOK_LIST_ENVELOPE_TYPE =
+            new TypeToken<WebhookListEnvelope>() {}.getType();
+
+    /**
+     * Envelope shape returned by {@code GET /v1/webhooks}:
+     * {@code {"webhooks":[...],"count":N}}. Internal — consumers get a
+     * {@link List}<{@link Webhook}> via {@link #list()}.
+     */
+    private static final class WebhookListEnvelope {
+        @SerializedName("webhooks")
+        List<Webhook> webhooks;
+        @SerializedName("count")
+        Integer count;
+    }
 
     private final HttpClient http;
 
@@ -52,7 +67,11 @@ public final class WebhooksResource {
      * @return the list of webhooks
      */
     public List<Webhook> list() {
-        return http.request("GET", "/v1/webhooks", null, WEBHOOK_LIST_TYPE);
+        WebhookListEnvelope envelope =
+                http.request("GET", "/v1/webhooks", null, WEBHOOK_LIST_ENVELOPE_TYPE);
+        return envelope == null || envelope.webhooks == null
+                ? Collections.emptyList()
+                : envelope.webhooks;
     }
 
     /**
@@ -62,7 +81,11 @@ public final class WebhooksResource {
      * @return the list of webhooks
      */
     public List<Webhook> list(Duration timeout) {
-        return http.request("GET", "/v1/webhooks", null, WEBHOOK_LIST_TYPE, timeout);
+        WebhookListEnvelope envelope =
+                http.request("GET", "/v1/webhooks", null, WEBHOOK_LIST_ENVELOPE_TYPE, timeout);
+        return envelope == null || envelope.webhooks == null
+                ? Collections.emptyList()
+                : envelope.webhooks;
     }
 
     /**
