@@ -3,7 +3,7 @@ package com.signdocsbrasil.api.models;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Represents a session within an envelope.
+ * A signer session that was added to an envelope.
  */
 public class EnvelopeSession {
 
@@ -27,6 +27,15 @@ public class EnvelopeSession {
 
     @SerializedName("expiresAt")
     private String expiresAt;
+
+    /**
+     * Set to {@code true} when the server dispatched an invitation email
+     * to {@code signer.email} at the time this session was added.
+     * Populated only when the envelope was created with an {@code owner}
+     * and the signer's email differs from the owner's.
+     */
+    @SerializedName("inviteSent")
+    private Boolean inviteSent;
 
     public EnvelopeSession() {
     }
@@ -85,6 +94,14 @@ public class EnvelopeSession {
 
     public void setExpiresAt(String expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    public Boolean getInviteSent() {
+        return inviteSent;
+    }
+
+    public void setInviteSent(Boolean inviteSent) {
+        this.inviteSent = inviteSent;
     }
 
     @Override

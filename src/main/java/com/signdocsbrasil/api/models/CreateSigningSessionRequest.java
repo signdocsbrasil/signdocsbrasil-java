@@ -1,34 +1,41 @@
 package com.signdocsbrasil.api.models;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Request to create a new signing session.
+ *
+ * <p>Signing sessions are the preferred way to kick off a single-signer
+ * flow. The request carries the {@code purpose} (document signature or
+ * action authentication), the verification {@code policy}, the
+ * {@code signer} identity, and optionally an inline {@code document},
+ * {@code action} metadata, branding {@code appearance}, and an
+ * {@code owner} to opt-in to server-managed invitation/completion
+ * emails.
  */
 public class CreateSigningSessionRequest {
 
-    @SerializedName("name")
-    private String name;
+    @SerializedName("purpose")
+    private String purpose;
 
-    @SerializedName("type")
-    private String type;
+    @SerializedName("policy")
+    private Policy policy;
 
-    @SerializedName("signers")
-    private List<SessionSigner> signers;
+    @SerializedName("signer")
+    private Signer signer;
 
-    @SerializedName("documents")
-    private List<SessionDocument> documents;
+    @SerializedName("document")
+    private SessionDocument document;
 
-    @SerializedName("callbackUrl")
-    private String callbackUrl;
+    @SerializedName("action")
+    private SessionAction action;
 
-    @SerializedName("redirectUrl")
-    private String redirectUrl;
+    @SerializedName("returnUrl")
+    private String returnUrl;
 
-    @SerializedName("expiresInMinutes")
-    private Integer expiresInMinutes;
+    @SerializedName("cancelUrl")
+    private String cancelUrl;
 
     @SerializedName("metadata")
     private Map<String, String> metadata;
@@ -36,66 +43,73 @@ public class CreateSigningSessionRequest {
     @SerializedName("locale")
     private String locale;
 
-    @SerializedName("brandingId")
-    private String brandingId;
+    @SerializedName("expiresInMinutes")
+    private Integer expiresInMinutes;
+
+    @SerializedName("appearance")
+    private SessionAppearance appearance;
+
+    /** See {@link Owner} for behavior when set. */
+    @SerializedName("owner")
+    private Owner owner;
 
     public CreateSigningSessionRequest() {
     }
 
-    public String getName() {
-        return name;
+    public String getPurpose() {
+        return purpose;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
     }
 
-    public String getType() {
-        return type;
+    public Policy getPolicy() {
+        return policy;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setPolicy(Policy policy) {
+        this.policy = policy;
     }
 
-    public List<SessionSigner> getSigners() {
-        return signers;
+    public Signer getSigner() {
+        return signer;
     }
 
-    public void setSigners(List<SessionSigner> signers) {
-        this.signers = signers;
+    public void setSigner(Signer signer) {
+        this.signer = signer;
     }
 
-    public List<SessionDocument> getDocuments() {
-        return documents;
+    public SessionDocument getDocument() {
+        return document;
     }
 
-    public void setDocuments(List<SessionDocument> documents) {
-        this.documents = documents;
+    public void setDocument(SessionDocument document) {
+        this.document = document;
     }
 
-    public String getCallbackUrl() {
-        return callbackUrl;
+    public SessionAction getAction() {
+        return action;
     }
 
-    public void setCallbackUrl(String callbackUrl) {
-        this.callbackUrl = callbackUrl;
+    public void setAction(SessionAction action) {
+        this.action = action;
     }
 
-    public String getRedirectUrl() {
-        return redirectUrl;
+    public String getReturnUrl() {
+        return returnUrl;
     }
 
-    public void setRedirectUrl(String redirectUrl) {
-        this.redirectUrl = redirectUrl;
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
     }
 
-    public Integer getExpiresInMinutes() {
-        return expiresInMinutes;
+    public String getCancelUrl() {
+        return cancelUrl;
     }
 
-    public void setExpiresInMinutes(Integer expiresInMinutes) {
-        this.expiresInMinutes = expiresInMinutes;
+    public void setCancelUrl(String cancelUrl) {
+        this.cancelUrl = cancelUrl;
     }
 
     public Map<String, String> getMetadata() {
@@ -114,131 +128,52 @@ public class CreateSigningSessionRequest {
         this.locale = locale;
     }
 
-    public String getBrandingId() {
-        return brandingId;
+    public Integer getExpiresInMinutes() {
+        return expiresInMinutes;
     }
 
-    public void setBrandingId(String brandingId) {
-        this.brandingId = brandingId;
+    public void setExpiresInMinutes(Integer expiresInMinutes) {
+        this.expiresInMinutes = expiresInMinutes;
     }
 
-    /**
-     * A signer participating in the signing session.
-     */
-    public static class SessionSigner {
+    public SessionAppearance getAppearance() {
+        return appearance;
+    }
 
-        @SerializedName("name")
-        private String name;
+    public void setAppearance(SessionAppearance appearance) {
+        this.appearance = appearance;
+    }
 
-        @SerializedName("email")
-        private String email;
+    public Owner getOwner() {
+        return owner;
+    }
 
-        @SerializedName("cpf")
-        private String cpf;
-
-        @SerializedName("phone")
-        private String phone;
-
-        @SerializedName("role")
-        private String role;
-
-        @SerializedName("order")
-        private Integer order;
-
-        @SerializedName("authMethods")
-        private List<String> authMethods;
-
-        public SessionSigner() {
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getCpf() {
-            return cpf;
-        }
-
-        public void setCpf(String cpf) {
-            this.cpf = cpf;
-        }
-
-        public String getPhone() {
-            return phone;
-        }
-
-        public void setPhone(String phone) {
-            this.phone = phone;
-        }
-
-        public String getRole() {
-            return role;
-        }
-
-        public void setRole(String role) {
-            this.role = role;
-        }
-
-        public Integer getOrder() {
-            return order;
-        }
-
-        public void setOrder(Integer order) {
-            this.order = order;
-        }
-
-        public List<String> getAuthMethods() {
-            return authMethods;
-        }
-
-        public void setAuthMethods(List<String> authMethods) {
-            this.authMethods = authMethods;
-        }
+    public void setOwner(Owner owner) {
+        this.owner = owner;
     }
 
     /**
-     * A document included in the signing session.
+     * Inline document attached to the signing session, serialized as
+     * {@code {"content":"<base64>", "filename":"..."}}.
      */
     public static class SessionDocument {
-
-        @SerializedName("name")
-        private String name;
 
         @SerializedName("content")
         private String content;
 
-        @SerializedName("contentType")
-        private String contentType;
-
-        @SerializedName("externalId")
-        private String externalId;
+        @SerializedName("filename")
+        private String filename;
 
         public SessionDocument() {
         }
 
-        public SessionDocument(String name, String content) {
-            this.name = name;
+        public SessionDocument(String content) {
             this.content = content;
         }
 
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
+        public SessionDocument(String content, String filename) {
+            this.content = content;
+            this.filename = filename;
         }
 
         public String getContent() {
@@ -249,20 +184,167 @@ public class CreateSigningSessionRequest {
             this.content = content;
         }
 
-        public String getContentType() {
-            return contentType;
+        public String getFilename() {
+            return filename;
         }
 
-        public void setContentType(String contentType) {
-            this.contentType = contentType;
+        public void setFilename(String filename) {
+            this.filename = filename;
+        }
+    }
+
+    /**
+     * Action metadata for ACTION_AUTHENTICATION sessions.
+     */
+    public static class SessionAction {
+
+        @SerializedName("type")
+        private String type;
+
+        @SerializedName("description")
+        private String description;
+
+        @SerializedName("reference")
+        private String reference;
+
+        public SessionAction() {
         }
 
-        public String getExternalId() {
-            return externalId;
+        public SessionAction(String type, String description) {
+            this.type = type;
+            this.description = description;
         }
 
-        public void setExternalId(String externalId) {
-            this.externalId = externalId;
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getReference() {
+            return reference;
+        }
+
+        public void setReference(String reference) {
+            this.reference = reference;
+        }
+    }
+
+    /**
+     * Branding / appearance configuration for the hosted signing UI.
+     */
+    public static class SessionAppearance {
+
+        @SerializedName("brandColor")
+        private String brandColor;
+
+        @SerializedName("logoUrl")
+        private String logoUrl;
+
+        @SerializedName("companyName")
+        private String companyName;
+
+        @SerializedName("backgroundColor")
+        private String backgroundColor;
+
+        @SerializedName("textColor")
+        private String textColor;
+
+        @SerializedName("buttonTextColor")
+        private String buttonTextColor;
+
+        @SerializedName("borderRadius")
+        private String borderRadius;
+
+        @SerializedName("headerStyle")
+        private String headerStyle;
+
+        @SerializedName("fontFamily")
+        private String fontFamily;
+
+        public SessionAppearance() {
+        }
+
+        public String getBrandColor() {
+            return brandColor;
+        }
+
+        public void setBrandColor(String brandColor) {
+            this.brandColor = brandColor;
+        }
+
+        public String getLogoUrl() {
+            return logoUrl;
+        }
+
+        public void setLogoUrl(String logoUrl) {
+            this.logoUrl = logoUrl;
+        }
+
+        public String getCompanyName() {
+            return companyName;
+        }
+
+        public void setCompanyName(String companyName) {
+            this.companyName = companyName;
+        }
+
+        public String getBackgroundColor() {
+            return backgroundColor;
+        }
+
+        public void setBackgroundColor(String backgroundColor) {
+            this.backgroundColor = backgroundColor;
+        }
+
+        public String getTextColor() {
+            return textColor;
+        }
+
+        public void setTextColor(String textColor) {
+            this.textColor = textColor;
+        }
+
+        public String getButtonTextColor() {
+            return buttonTextColor;
+        }
+
+        public void setButtonTextColor(String buttonTextColor) {
+            this.buttonTextColor = buttonTextColor;
+        }
+
+        public String getBorderRadius() {
+            return borderRadius;
+        }
+
+        public void setBorderRadius(String borderRadius) {
+            this.borderRadius = borderRadius;
+        }
+
+        public String getHeaderStyle() {
+            return headerStyle;
+        }
+
+        public void setHeaderStyle(String headerStyle) {
+            this.headerStyle = headerStyle;
+        }
+
+        public String getFontFamily() {
+            return fontFamily;
+        }
+
+        public void setFontFamily(String fontFamily) {
+            this.fontFamily = fontFamily;
         }
     }
 }

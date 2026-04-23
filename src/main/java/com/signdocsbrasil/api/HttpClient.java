@@ -25,7 +25,7 @@ import java.util.logging.Level;
  */
 public final class HttpClient {
 
-    private static final String SDK_VERSION = "1.3.0";
+    private static final String SDK_VERSION = "1.4.0";
     private static final String USER_AGENT = "signdocs-brasil-java/" + SDK_VERSION;
 
     private final java.net.http.HttpClient client;
