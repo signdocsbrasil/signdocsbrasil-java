@@ -14,6 +14,9 @@ public class VerificationResponse {
     @SerializedName("transactionId")
     private String transactionId;
 
+    @SerializedName("envelopeId")
+    private String envelopeId;
+
     @SerializedName("status")
     private String status;
 
@@ -64,6 +67,14 @@ public class VerificationResponse {
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public String getEnvelopeId() {
+        return envelopeId;
+    }
+
+    public void setEnvelopeId(String envelopeId) {
+        this.envelopeId = envelopeId;
     }
 
     public String getStatus() {

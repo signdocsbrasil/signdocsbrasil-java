@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class WebhookEventTest {
 
     /**
-     * Canonical 17 event types from openapi/openapi.yaml:2473
+     * Canonical event types from openapi/openapi.yaml:2473
      * (WebhookEventType schema). Keep this list in lockstep with the spec.
      */
     private static final List<String> SPEC_EVENTS = Arrays.asList(
@@ -35,7 +35,10 @@ class WebhookEventTest {
             "SIGNING_SESSION.CREATED",
             "SIGNING_SESSION.COMPLETED",
             "SIGNING_SESSION.CANCELLED",
-            "SIGNING_SESSION.EXPIRED");
+            "SIGNING_SESSION.EXPIRED",
+            "ENVELOPE.CREATED",
+            "ENVELOPE.ALL_SIGNED",
+            "ENVELOPE.EXPIRED");
 
     @Test
     void enumCoversAllSpecEvents() {
@@ -46,7 +49,7 @@ class WebhookEventTest {
 
         assertEquals(expected, enumWireValues,
                 "WebhookEvent enum must match the OpenAPI spec WebhookEventType");
-        assertEquals(17, WebhookEvent.values().length);
+        assertEquals(20, WebhookEvent.values().length);
     }
 
     @Test
