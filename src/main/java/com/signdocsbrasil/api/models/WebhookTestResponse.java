@@ -3,43 +3,35 @@ package com.signdocsbrasil.api.models;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Response from testing a webhook delivery.
+ * Response from testing a webhook delivery via
+ * {@code POST /v1/webhooks/{webhookId}/test}.
+ *
+ * <p>Shape: {@code {"webhookId": "wh_...", "testDelivery": { ... }}}.
  */
 public class WebhookTestResponse {
 
-    @SerializedName("deliveryId")
-    private String deliveryId;
+    @SerializedName("webhookId")
+    private String webhookId;
 
-    @SerializedName("status")
-    private String status;
-
-    @SerializedName("statusCode")
-    private Integer statusCode;
+    @SerializedName("testDelivery")
+    private WebhookTestDelivery testDelivery;
 
     public WebhookTestResponse() {
     }
 
-    public String getDeliveryId() {
-        return deliveryId;
+    public String getWebhookId() {
+        return webhookId;
     }
 
-    public void setDeliveryId(String deliveryId) {
-        this.deliveryId = deliveryId;
+    public void setWebhookId(String webhookId) {
+        this.webhookId = webhookId;
     }
 
-    public String getStatus() {
-        return status;
+    public WebhookTestDelivery getTestDelivery() {
+        return testDelivery;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Integer getStatusCode() {
-        return statusCode;
-    }
-
-    public void setStatusCode(Integer statusCode) {
-        this.statusCode = statusCode;
+    public void setTestDelivery(WebhookTestDelivery testDelivery) {
+        this.testDelivery = testDelivery;
     }
 }

@@ -131,7 +131,7 @@ class HttpClientObserverTest {
 
         try {
             String ua = server.takeRequest().getHeader("User-Agent");
-            assertEquals("signdocs-brasil-java/1.4.0", ua);
+            assertEquals("signdocs-brasil-java/1.4.1", ua);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             fail(e);

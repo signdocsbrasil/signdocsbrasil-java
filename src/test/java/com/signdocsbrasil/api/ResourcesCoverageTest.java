@@ -470,12 +470,18 @@ class ResourcesCoverageTest {
     void webhooksTest() {
         enqueueToken();
         server.enqueue(new MockResponse()
-                .setBody("{\"success\":true}")
+                .setBody("{\"webhookId\":\"wh_1\",\"testDelivery\":{\"httpStatus\":200,\"success\":true,\"timestamp\":\"2026-04-27T01:23:28.323Z\"}}")
                 .setHeader("Content-Type", "application/json"));
 
         SignDocsBrasilClient client = createClient();
         WebhookTestResponse resp = client.webhooks().test("wh_1");
         assertNotNull(resp);
+        assertEquals("wh_1", resp.getWebhookId());
+        assertNotNull(resp.getTestDelivery());
+        assertEquals(200, resp.getTestDelivery().getHttpStatus());
+        assertTrue(resp.getTestDelivery().isSuccess());
+        assertNull(resp.getTestDelivery().getError());
+        assertEquals("2026-04-27T01:23:28.323Z", resp.getTestDelivery().getTimestamp());
     }
 
     // ── Steps/Signing/Evidence/Verification/Users/DocGroups timeout overloads ──
@@ -695,12 +701,17 @@ class ResourcesCoverageTest {
     void webhooksTestWithTimeout() {
         enqueueToken();
         server.enqueue(new MockResponse()
-                .setBody("{\"success\":true}")
+                .setBody("{\"webhookId\":\"wh_1\",\"testDelivery\":{\"httpStatus\":502,\"success\":false,\"error\":\"Bad Gateway\",\"timestamp\":\"2026-04-27T01:23:28.323Z\"}}")
                 .setHeader("Content-Type", "application/json"));
 
         SignDocsBrasilClient client = createClient();
         WebhookTestResponse resp = client.webhooks().test("wh_1", Duration.ofSeconds(5));
         assertNotNull(resp);
+        assertEquals("wh_1", resp.getWebhookId());
+        assertNotNull(resp.getTestDelivery());
+        assertEquals(502, resp.getTestDelivery().getHttpStatus());
+        assertFalse(resp.getTestDelivery().isSuccess());
+        assertEquals("Bad Gateway", resp.getTestDelivery().getError());
     }
 
     // ── SigningSessions create overloads ─────────────────────────

@@ -182,6 +182,48 @@ class ModelsTest {
     }
 
     @Test
+    void webhookTestResponseDeserializesNestedTestDelivery() {
+        // Mirror the live API response shape (per OpenAPI spec for
+        // POST /v1/webhooks/{webhookId}/test): top-level webhookId + nested
+        // testDelivery {httpStatus, success, error?, timestamp}.
+        String json = "{"
+                + "\"webhookId\":\"wh_abc123\","
+                + "\"testDelivery\":{"
+                + "\"httpStatus\":200,"
+                + "\"success\":true,"
+                + "\"timestamp\":\"2026-04-27T01:23:28.323Z\""
+                + "}}";
+
+        WebhookTestResponse resp = GSON.fromJson(json, WebhookTestResponse.class);
+
+        assertEquals("wh_abc123", resp.getWebhookId());
+        assertNotNull(resp.getTestDelivery());
+        assertEquals(200, resp.getTestDelivery().getHttpStatus());
+        assertTrue(resp.getTestDelivery().isSuccess());
+        assertNull(resp.getTestDelivery().getError());
+        assertEquals("2026-04-27T01:23:28.323Z", resp.getTestDelivery().getTimestamp());
+    }
+
+    @Test
+    void webhookTestResponseDeserializesFailedDeliveryWithError() {
+        String json = "{"
+                + "\"webhookId\":\"wh_abc123\","
+                + "\"testDelivery\":{"
+                + "\"httpStatus\":500,"
+                + "\"success\":false,"
+                + "\"error\":\"Internal Server Error\","
+                + "\"timestamp\":\"2026-04-27T01:23:28.323Z\""
+                + "}}";
+
+        WebhookTestResponse resp = GSON.fromJson(json, WebhookTestResponse.class);
+
+        assertEquals("wh_abc123", resp.getWebhookId());
+        assertEquals(500, resp.getTestDelivery().getHttpStatus());
+        assertFalse(resp.getTestDelivery().isSuccess());
+        assertEquals("Internal Server Error", resp.getTestDelivery().getError());
+    }
+
+    @Test
     void registerWebhookResponseFromFixture() throws Exception {
         JsonObject body = readFixtureResponseBody("webhooks-register.json");
         RegisterWebhookResponse response = GSON.fromJson(body, RegisterWebhookResponse.class);

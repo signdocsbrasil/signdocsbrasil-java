@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-04-27
+
+### Fixed
+
+- **`WebhookTestResponse` shape** — was `{deliveryId, status, statusCode}`, now matches the API spec `{webhookId, testDelivery: {httpStatus, success, error?, timestamp}}`. The previous shape never matched what `POST /v1/webhooks/{webhookId}/test` actually returns, so the typed wrapper was returning all-empty fields against the live HML API. Same fix applied across the PHP SDK and the four other language SDKs in parallel.
+- New `WebhookTestDelivery` model class for the nested `testDelivery` object (`httpStatus`, `success`, `error` (nullable), `timestamp`).
+
+### Changed
+
+- `User-Agent` bumped to `signdocs-brasil-java/1.4.1`.
+
 ## [1.4.0] - 2026-04-23
 
 ### Fixed (BREAKING IF YOU SOMEHOW USED 1.x SUCCESSFULLY)

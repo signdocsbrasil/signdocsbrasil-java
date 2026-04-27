@@ -6,7 +6,7 @@
 
     <groupId>io.github.signdocsbrasil</groupId>
     <artifactId>signdocsbrasil-api</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
     <packaging>jar</packaging>
 
     <name>SignDocsBrasil Java SDK</name>
