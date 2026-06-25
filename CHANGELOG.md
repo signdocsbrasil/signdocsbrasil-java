@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-06-25
+
+### Added
+
+- `client.verification().verifyDocument(VerifyDocumentRequest)` — inspects an uploaded PDF for embedded signatures via `POST /v1/verify/document`. Returns a `VerifyDocumentResponse` reporting `signed`, `signatureCount`, a list of `DetectedSignature` (`method`, `type` — one of `pades` / `pkcs7` / `legacy` / `digital_certificate` —, `subFilter`, `filter`, `confidence`), and `checkedAt`. A per-request-timeout overload is also provided.
+- New model classes `VerifyDocumentRequest`, `VerifyDocumentResponse`, and `DetectedSignature`.
+
+  Unlike the other methods on `VerificationResource`, this endpoint is **authenticated** (Bearer JWT) and requires the `verification:write` scope. It is **production-credentials-only** at runtime.
+
+### Changed
+
+- `User-Agent` bumped to `signdocs-brasil-java/1.6.0`.
+
 ## [1.5.0] - 2026-04-27
 
 ### Added

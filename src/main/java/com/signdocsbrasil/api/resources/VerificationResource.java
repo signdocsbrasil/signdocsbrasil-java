@@ -4,6 +4,8 @@ import com.signdocsbrasil.api.HttpClient;
 import com.signdocsbrasil.api.models.EnvelopeVerificationResponse;
 import com.signdocsbrasil.api.models.VerificationDownloadsResponse;
 import com.signdocsbrasil.api.models.VerificationResponse;
+import com.signdocsbrasil.api.models.VerifyDocumentRequest;
+import com.signdocsbrasil.api.models.VerifyDocumentResponse;
 
 import java.time.Duration;
 
@@ -97,5 +99,42 @@ public final class VerificationResource {
     public EnvelopeVerificationResponse verifyEnvelope(String envelopeId, Duration timeout) {
         return http.requestNoAuth("GET", "/v1/verify/envelope/" + envelopeId,
                 EnvelopeVerificationResponse.class, timeout);
+    }
+
+    /**
+     * Inspects an uploaded PDF for embedded signatures, reporting whether the
+     * document is signed, how many signatures were detected, and the type of
+     * each ({@code pades}, {@code pkcs7}, {@code legacy}, or
+     * {@code digital_certificate}).
+     *
+     * <p>Unlike the other verification methods on this resource, this endpoint
+     * is <strong>authenticated</strong> (Bearer JWT) and requires the
+     * {@code verification:write} scope. It is also
+     * <strong>production-credentials-only</strong> at runtime — sandbox/HML
+     * credentials are rejected by the API.
+     *
+     * @param request the verify request carrying the base64-encoded PDF
+     *                 {@code content} and an optional {@code filename}
+     * @return the document verification response
+     */
+    public VerifyDocumentResponse verifyDocument(VerifyDocumentRequest request) {
+        return http.request("POST", "/v1/verify/document", request,
+                VerifyDocumentResponse.class);
+    }
+
+    /**
+     * Inspects an uploaded PDF for embedded signatures with a per-request
+     * timeout. Authenticated (Bearer JWT), requires the
+     * {@code verification:write} scope, and is production-credentials-only at
+     * runtime.
+     *
+     * @param request the verify request carrying the base64-encoded PDF
+     *                 {@code content} and an optional {@code filename}
+     * @param timeout the request timeout
+     * @return the document verification response
+     */
+    public VerifyDocumentResponse verifyDocument(VerifyDocumentRequest request, Duration timeout) {
+        return http.request("POST", "/v1/verify/document", request,
+                VerifyDocumentResponse.class, timeout);
     }
 }
