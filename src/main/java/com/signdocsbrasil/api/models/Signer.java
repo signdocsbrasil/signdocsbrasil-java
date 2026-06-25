@@ -34,6 +34,9 @@ public class Signer {
     @SerializedName("otpChannel")
     private String otpChannel;
 
+    @SerializedName("otpChannelSelectable")
+    private Boolean otpChannelSelectable;
+
     public Signer() {
     }
 
@@ -112,6 +115,14 @@ public class Signer {
 
     public void setOtpChannel(String otpChannel) {
         this.otpChannel = otpChannel;
+    }
+
+    public Boolean getOtpChannelSelectable() {
+        return otpChannelSelectable;
+    }
+
+    public void setOtpChannelSelectable(Boolean otpChannelSelectable) {
+        this.otpChannelSelectable = otpChannelSelectable;
     }
 
     @Override

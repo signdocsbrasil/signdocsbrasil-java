@@ -106,6 +106,12 @@ public class SigningSessionBootstrap {
         @SerializedName("maskedCpf")
         private String maskedCpf;
 
+        @SerializedName("availableOtpChannels")
+        private List<String> availableOtpChannels;
+
+        @SerializedName("otpChannelSelectable")
+        private Boolean otpChannelSelectable;
+
         public BootstrapSigner() {
         }
 
@@ -117,6 +123,12 @@ public class SigningSessionBootstrap {
 
         public String getMaskedCpf() { return maskedCpf; }
         public void setMaskedCpf(String maskedCpf) { this.maskedCpf = maskedCpf; }
+
+        public List<String> getAvailableOtpChannels() { return availableOtpChannels; }
+        public void setAvailableOtpChannels(List<String> availableOtpChannels) { this.availableOtpChannels = availableOtpChannels; }
+
+        public Boolean getOtpChannelSelectable() { return otpChannelSelectable; }
+        public void setOtpChannelSelectable(Boolean otpChannelSelectable) { this.otpChannelSelectable = otpChannelSelectable; }
     }
 
     public static class BootstrapStep {

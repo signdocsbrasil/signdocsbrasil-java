@@ -5,6 +5,7 @@ import com.signdocsbrasil.api.models.AdvanceSessionRequest;
 import com.signdocsbrasil.api.models.AdvanceSessionResponse;
 import com.signdocsbrasil.api.models.CancelSigningSessionResponse;
 import com.signdocsbrasil.api.models.CreateSigningSessionRequest;
+import com.signdocsbrasil.api.models.ResendOtpRequest;
 import com.signdocsbrasil.api.models.SigningSession;
 import com.signdocsbrasil.api.models.SigningSessionBootstrap;
 import com.signdocsbrasil.api.models.SigningSessionListParams;
@@ -173,8 +174,20 @@ public final class SigningSessionsResource {
      * @return the advance session response with updated step info
      */
     public AdvanceSessionResponse resendOtp(String sessionId) {
+        return resendOtp(sessionId, (ResendOtpRequest) null);
+    }
+
+    /**
+     * Resends the OTP challenge for a signing session, optionally selecting the
+     * delivery channel.
+     *
+     * @param sessionId the signing session ID
+     * @param request   the resend request with the desired channel, or null for the default
+     * @return the advance session response with updated step info
+     */
+    public AdvanceSessionResponse resendOtp(String sessionId, ResendOtpRequest request) {
         return http.request("POST", "/v1/signing-sessions/" + sessionId + "/resend-otp",
-                null, AdvanceSessionResponse.class);
+                request, AdvanceSessionResponse.class);
     }
 
     /**
@@ -185,8 +198,20 @@ public final class SigningSessionsResource {
      * @return the advance session response with updated step info
      */
     public AdvanceSessionResponse resendOtp(String sessionId, Duration timeout) {
+        return resendOtp(sessionId, (ResendOtpRequest) null, timeout);
+    }
+
+    /**
+     * Resends the OTP challenge with a selected delivery channel and a per-request timeout.
+     *
+     * @param sessionId the signing session ID
+     * @param request   the resend request with the desired channel, or null for the default
+     * @param timeout   the request timeout
+     * @return the advance session response with updated step info
+     */
+    public AdvanceSessionResponse resendOtp(String sessionId, ResendOtpRequest request, Duration timeout) {
         return http.request("POST", "/v1/signing-sessions/" + sessionId + "/resend-otp",
-                null, AdvanceSessionResponse.class, timeout);
+                request, AdvanceSessionResponse.class, timeout);
     }
 
     /**

@@ -14,6 +14,9 @@ public class AdvanceSessionRequest {
     @SerializedName("otpCode")
     private String otpCode;
 
+    @SerializedName("otpChannel")
+    private String otpChannel;
+
     @SerializedName("livenessSessionId")
     private String livenessSessionId;
 
@@ -50,6 +53,14 @@ public class AdvanceSessionRequest {
 
     public void setOtpCode(String otpCode) {
         this.otpCode = otpCode;
+    }
+
+    public String getOtpChannel() {
+        return otpChannel;
+    }
+
+    public void setOtpChannel(String otpChannel) {
+        this.otpChannel = otpChannel;
     }
 
     public String getLivenessSessionId() {
