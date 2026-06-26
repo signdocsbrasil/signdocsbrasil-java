@@ -153,4 +153,4 @@ Transaction tx = client.transactions().get("tx_123", Duration.ofSeconds(5));
 
 ## Documentação
 
-Para guias completos de integração com exemplos passo-a-passo de todos os fluxos de assinatura, veja a [documentação centralizada](../docs/README.md).
+Para guias completos de integração com exemplos passo-a-passo de todos os fluxos de assinatura, veja a [documentação completa da API](https://docs.signdocs.com.br).
