@@ -16,8 +16,33 @@ public class DownloadResponse {
     @SerializedName("originalUrl")
     private String originalUrl;
 
+    /**
+     * Signed/stamped document. Present for PDF transactions
+     * ({@code documentFormat == "pdf"}), where the signature is embedded.
+     */
     @SerializedName("signedUrl")
     private String signedUrl;
+
+    /**
+     * Detached CAdES signature ({@code .p7s}). Returned instead of
+     * {@code signedUrl} for non-PDF transactions
+     * ({@code documentFormat == "generic"}), which cannot carry an embedded
+     * signature.
+     *
+     * <p>Caveat: the API presigns this key without checking that the object
+     * exists, so a non-PDF signed under a click/OTP policy still returns a URL
+     * here — one that 404s, because only the digital-certificate step writes a
+     * {@code .p7s}. Branch on the signing policy, not on this field being set.
+     */
+    @SerializedName("signatureUrl")
+    private String signatureUrl;
+
+    /**
+     * {@code "pdf"} or {@code "generic"}, derived by the API from the uploaded
+     * bytes rather than the filename.
+     */
+    @SerializedName("documentFormat")
+    private String documentFormat;
 
     @SerializedName("expiresIn")
     private int expiresIn;
@@ -63,5 +88,21 @@ public class DownloadResponse {
 
     public void setExpiresIn(int expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public String getSignatureUrl() {
+        return signatureUrl;
+    }
+
+    public void setSignatureUrl(String signatureUrl) {
+        this.signatureUrl = signatureUrl;
+    }
+
+    public String getDocumentFormat() {
+        return documentFormat;
+    }
+
+    public void setDocumentFormat(String documentFormat) {
+        this.documentFormat = documentFormat;
     }
 }
