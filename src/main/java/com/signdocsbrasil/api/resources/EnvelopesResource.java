@@ -2,6 +2,7 @@ package com.signdocsbrasil.api.resources;
 
 import com.signdocsbrasil.api.HttpClient;
 import com.signdocsbrasil.api.models.AddEnvelopeSessionRequest;
+import com.signdocsbrasil.api.models.CancelEnvelopeResponse;
 import com.signdocsbrasil.api.models.CreateEnvelopeRequest;
 import com.signdocsbrasil.api.models.Envelope;
 import com.signdocsbrasil.api.models.EnvelopeCombinedStampResponse;
@@ -9,6 +10,8 @@ import com.signdocsbrasil.api.models.EnvelopeDetail;
 import com.signdocsbrasil.api.models.EnvelopeSession;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Resource for envelope operations.
@@ -120,6 +123,55 @@ public final class EnvelopesResource {
     public EnvelopeSession addSession(String envelopeId, AddEnvelopeSessionRequest request, Duration timeout) {
         return http.request("POST", "/v1/envelopes/" + envelopeId + "/sessions",
                 request, EnvelopeSession.class, timeout);
+    }
+
+    // ── cancel ──────────────────────────────────────────────────────────
+
+    /**
+     * Cancels an entire envelope.
+     *
+     * <p>Transitions every non-terminal session and its transaction to CANCELLED
+     * and marks the envelope CANCELLED, killing the pending signing links.
+     * Signatures already collected are preserved and reported as
+     * {@code preservedSignedCount}.
+     *
+     * <p>Prefer this over cancelling each session individually: it is one call,
+     * it records the cancellation as a single auditable terminal event, and it
+     * is the only way to move the envelope's own status. Cancelling the member
+     * sessions one by one leaves the envelope itself ACTIVE.
+     *
+     * <p>Idempotent: re-cancelling returns {@code cancelledCount} 0 and
+     * {@code alreadyCancelled} true.
+     *
+     * @param envelopeId the envelope ID
+     * @param reason     free-text reason recorded in the audit trail; null lets
+     *                   the API default it to {@code envelope_cancelled}
+     * @return the cancellation result
+     */
+    public CancelEnvelopeResponse cancel(String envelopeId, String reason) {
+        return http.request("POST", "/v1/envelopes/" + envelopeId + "/cancel",
+                cancelBody(reason), CancelEnvelopeResponse.class);
+    }
+
+    /**
+     * Cancels an entire envelope with a per-request timeout.
+     *
+     * @param envelopeId the envelope ID
+     * @param reason     free-text reason recorded in the audit trail; may be null
+     * @param timeout    the request timeout
+     * @return the cancellation result
+     */
+    public CancelEnvelopeResponse cancel(String envelopeId, String reason, Duration timeout) {
+        return http.request("POST", "/v1/envelopes/" + envelopeId + "/cancel",
+                cancelBody(reason), CancelEnvelopeResponse.class, timeout);
+    }
+
+    private static Map<String, String> cancelBody(String reason) {
+        Map<String, String> body = new HashMap<>();
+        if (reason != null && !reason.isEmpty()) {
+            body.put("reason", reason);
+        }
+        return body;
     }
 
     // ── combinedStamp ───────────────────────────────────────────────────
