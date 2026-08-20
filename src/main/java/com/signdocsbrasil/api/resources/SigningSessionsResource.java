@@ -5,6 +5,7 @@ import com.signdocsbrasil.api.models.AdvanceSessionRequest;
 import com.signdocsbrasil.api.models.AdvanceSessionResponse;
 import com.signdocsbrasil.api.models.CancelSigningSessionResponse;
 import com.signdocsbrasil.api.models.CreateSigningSessionRequest;
+import com.signdocsbrasil.api.models.MintSigningLinkResponse;
 import com.signdocsbrasil.api.models.ResendOtpRequest;
 import com.signdocsbrasil.api.models.SigningSession;
 import com.signdocsbrasil.api.models.SigningSessionBootstrap;
@@ -117,6 +118,50 @@ public final class SigningSessionsResource {
     public CancelSigningSessionResponse cancel(String sessionId, Duration timeout) {
         return http.request("POST", "/v1/signing-sessions/" + sessionId + "/cancel",
                 null, CancelSigningSessionResponse.class, timeout);
+    }
+
+    /**
+     * Mints a fresh signing URL for an existing session and returns it, instead of
+     * e-mailing it.
+     *
+     * <p>A signing link is single-use: once the signer finishes — or the embed token
+     * is otherwise consumed — reopening the same URL returns
+     * {@code 401 Embed token has been consumed}. This issues a new one without
+     * creating another transaction and without consuming quota. It works for
+     * standalone and envelope sessions alike.
+     *
+     * <p>The session must be {@code ACTIVE}; a completed or cancelled one throws
+     * {@link com.signdocsbrasil.api.errors.ConflictException}, since a link to a
+     * finished session would authenticate nothing. Use
+     * {@code EnvelopesResource.combinedStamp} or {@code TransactionsResource.download}
+     * to reach the signed document instead.
+     *
+     * <p>{@code expiresAt} is inherited from the original session and is not extended.
+     *
+     * <p><strong>Authorises the tenant, not the end user.</strong> The API cannot tell
+     * which of your users is entitled to this link, so an application whose users share
+     * one tenant must establish that itself before calling — otherwise this becomes a
+     * way for one user to obtain another's signing credential.
+     *
+     * @param sessionId the signing session ID; must be ACTIVE
+     * @return the newly minted signing link
+     */
+    public MintSigningLinkResponse link(String sessionId) {
+        return http.request("POST", "/v1/signing-sessions/" + sessionId + "/link",
+                null, MintSigningLinkResponse.class);
+    }
+
+    /**
+     * Mints a fresh signing URL for an existing session, with a per-request timeout.
+     *
+     * @param sessionId the signing session ID; must be ACTIVE
+     * @param timeout   the request timeout
+     * @return the newly minted signing link
+     * @see #link(String)
+     */
+    public MintSigningLinkResponse link(String sessionId, Duration timeout) {
+        return http.request("POST", "/v1/signing-sessions/" + sessionId + "/link",
+                null, MintSigningLinkResponse.class, timeout);
     }
 
     /**
