@@ -113,7 +113,7 @@ class HttpClientObserverTest {
     }
 
     @Test
-    void userAgentReflects130() {
+    void userAgentReflectsProjectVersion() {
         Config config = Config.builder()
                 .clientId("test-client")
                 .clientSecret("test-secret")
@@ -131,10 +131,34 @@ class HttpClientObserverTest {
 
         try {
             String ua = server.takeRequest().getHeader("User-Agent");
-            assertEquals("signdocs-brasil-java/1.8.0", ua);
+            // Read from the pom rather than pinned to a literal: pinning is what
+            // let this constant sit at 1.3.0, then 1.8.0, while the artifact
+            // shipped 1.9.0 — every request reporting a version nobody was
+            // running. A release that forgets SDK_VERSION now fails here.
+            assertEquals("signdocs-brasil-java/" + projectVersion(), ua);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             fail(e);
+        }
+    }
+
+    /** The {@code <version>} declared for this project in pom.xml. */
+    private static String projectVersion() {
+        try {
+            String pom = new String(
+                    java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("pom.xml")),
+                    java.nio.charset.StandardCharsets.UTF_8);
+            // The project's own version is the first <version> element, declared
+            // above <dependencies>; dependency versions come later.
+            java.util.regex.Matcher m = java.util.regex.Pattern
+                    .compile("<version>([^<]+)</version>")
+                    .matcher(pom.substring(0, pom.indexOf("<dependencies>")));
+            if (!m.find()) {
+                throw new IllegalStateException("no <version> found in pom.xml");
+            }
+            return m.group(1);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("could not read pom.xml", e);
         }
     }
 }
