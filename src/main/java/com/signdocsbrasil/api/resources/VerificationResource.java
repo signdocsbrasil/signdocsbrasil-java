@@ -118,8 +118,24 @@ public final class VerificationResource {
      * @return the document verification response
      */
     public VerifyDocumentResponse verifyDocument(VerifyDocumentRequest request) {
-        return http.request("POST", "/v1/verify/document", request,
-                VerifyDocumentResponse.class);
+        return verifyDocument(request, (String) null);
+    }
+
+    /**
+     * Inspects an uploaded PDF for embedded signatures, with a specified
+     * idempotency key.
+     *
+     * <p>The endpoint is metered and its answer is a pure function of the PDF,
+     * so an unkeyed retry pays the verification quota twice for an identical
+     * result.
+     *
+     * @param request        the verify request carrying the base64-encoded PDF
+     * @param idempotencyKey the idempotency key, or null to auto-generate
+     * @return the verification result
+     */
+    public VerifyDocumentResponse verifyDocument(VerifyDocumentRequest request, String idempotencyKey) {
+        return http.requestWithIdempotency("POST", "/v1/verify/document", request,
+                VerifyDocumentResponse.class, idempotencyKey);
     }
 
     /**
@@ -134,7 +150,7 @@ public final class VerificationResource {
      * @return the document verification response
      */
     public VerifyDocumentResponse verifyDocument(VerifyDocumentRequest request, Duration timeout) {
-        return http.request("POST", "/v1/verify/document", request,
-                VerifyDocumentResponse.class, timeout);
+        return http.requestWithIdempotency("POST", "/v1/verify/document", request,
+                VerifyDocumentResponse.class, null, timeout);
     }
 }

@@ -101,4 +101,41 @@ class VerifyDocumentTest {
         assertTrue(apiReq.getHeader("Authorization").startsWith("Bearer "));
         assertTrue(apiReq.getBody().readUtf8().contains("\"content\":\"JVBERi0xLjQK...\""));
     }
+
+    @Test
+    void verifyDocumentSendsIdempotencyKey() throws Exception {
+        // Metered endpoint whose answer is a pure function of the PDF, and the
+        // client retries 429/500/503 — an unkeyed retry paid the verification
+        // quota twice for an identical result.
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"signed\":false,\"signatureCount\":0,\"signatures\":[]," +
+                        "\"checkedAt\":\"2024-11-15T00:05:00.000Z\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        createResource().verifyDocument(
+                new VerifyDocumentRequest("JVBERi0xLjQK", "c.pdf"), "idem-vd-1");
+
+        server.takeRequest();                       // token
+        RecordedRequest req = server.takeRequest(); // verify
+        assertEquals("idem-vd-1", req.getHeader("X-Idempotency-Key"));
+    }
+
+    @Test
+    void verifyDocumentGeneratesKeyWhenOmitted() throws Exception {
+        // Omitting the key must still take the idempotent path; the client
+        // mints one so it stays stable across its own retries.
+        enqueueToken();
+        server.enqueue(new MockResponse()
+                .setBody("{\"signed\":false,\"signatureCount\":0,\"signatures\":[]," +
+                        "\"checkedAt\":\"2024-11-15T00:05:00.000Z\"}")
+                .setHeader("Content-Type", "application/json"));
+
+        createResource().verifyDocument(new VerifyDocumentRequest("JVBERi0xLjQK", "c.pdf"));
+
+        server.takeRequest();
+        RecordedRequest req = server.takeRequest();
+        assertNotNull(req.getHeader("X-Idempotency-Key"),
+                "verifyDocument sent no X-Idempotency-Key; an unkeyed retry double-charges");
+    }
 }

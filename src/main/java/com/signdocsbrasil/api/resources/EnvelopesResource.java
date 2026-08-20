@@ -101,15 +101,39 @@ public final class EnvelopesResource {
     // ── addSession ──────────────────────────────────────────────────────
 
     /**
-     * Adds a signing session to an envelope.
+     * Adds a signing session to an envelope, with an automatically generated
+     * idempotency key.
+     *
+     * <p>The key matters more here than on most calls: this response carries the
+     * only copy of {@code clientSecret}, and the client retries 429/500/503 —
+     * so an unkeyed retry creates a second signer, charges the quota again and
+     * sends a second invitation.
      *
      * @param envelopeId the envelope ID
      * @param request    the add-session request
      * @return the created envelope session
      */
     public EnvelopeSession addSession(String envelopeId, AddEnvelopeSessionRequest request) {
-        return http.request("POST", "/v1/envelopes/" + envelopeId + "/sessions",
-                request, EnvelopeSession.class);
+        return addSession(envelopeId, request, (String) null);
+    }
+
+    /**
+     * Adds a signing session to an envelope with a specified idempotency key.
+     *
+     * <p>Use a distinct key per signer. The API scopes its idempotency cache by
+     * key and resolved path, and every signer on an envelope shares that path,
+     * so one key across the loop returns signer 1's response — and signer 1's
+     * {@code clientSecret} — for signer 2.
+     *
+     * @param envelopeId     the envelope ID
+     * @param request        the add-session request
+     * @param idempotencyKey the idempotency key, or null to auto-generate
+     * @return the created envelope session
+     */
+    public EnvelopeSession addSession(String envelopeId, AddEnvelopeSessionRequest request,
+                                      String idempotencyKey) {
+        return http.requestWithIdempotency("POST", "/v1/envelopes/" + envelopeId + "/sessions",
+                request, EnvelopeSession.class, idempotencyKey);
     }
 
     /**
@@ -121,8 +145,8 @@ public final class EnvelopesResource {
      * @return the created envelope session
      */
     public EnvelopeSession addSession(String envelopeId, AddEnvelopeSessionRequest request, Duration timeout) {
-        return http.request("POST", "/v1/envelopes/" + envelopeId + "/sessions",
-                request, EnvelopeSession.class, timeout);
+        return http.requestWithIdempotency("POST", "/v1/envelopes/" + envelopeId + "/sessions",
+                request, EnvelopeSession.class, null, timeout);
     }
 
     // ── cancel ──────────────────────────────────────────────────────────
