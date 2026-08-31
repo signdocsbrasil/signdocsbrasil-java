@@ -49,8 +49,50 @@ public class AdvanceSessionResponse {
     @SerializedName("sandbox")
     private SandboxData sandbox;
 
+    /**
+     * Why a step was rejected, when the step fails but the <em>request</em> does not.
+     *
+     * <p>This is the part that matters most in a biometric integration: a
+     * rejected step comes back <strong>200</strong> with the session still
+     * {@code ACTIVE} and the reason here, not as an HTTP error. Code that only
+     * catches exceptions from the call reads a rejection as success.
+     *
+     * <p>Emitted today: {@code BIOMETRIC_MATCH_FAILED},
+     * {@code LIVENESS_NOT_COMPLETED}, {@code DOCUMENT_QUALITY_LOW},
+     * {@code DOCUMENT_MATCH_FAILED} and the {@code SERPRO_*} family.
+     */
+    @SerializedName("errorCode")
+    private String errorCode;
+
+    /** pt-BR text addressed to the signer, ready to display. */
+    @SerializedName("errorDetail")
+    private String errorDetail;
+
+    /**
+     * True while the step has attempts left. Once they run out the step goes
+     * FAILED and this is false — the signal that retrying will not help. Each
+     * retry is billed as overage.
+     */
+    @SerializedName("retryable")
+    private Boolean retryable;
+
+    @SerializedName("fallback")
+    private AdvanceFallback fallback;
+
     public AdvanceSessionResponse() {
     }
+
+    public String getErrorCode() { return errorCode; }
+    public void setErrorCode(String errorCode) { this.errorCode = errorCode; }
+
+    public String getErrorDetail() { return errorDetail; }
+    public void setErrorDetail(String errorDetail) { this.errorDetail = errorDetail; }
+
+    public Boolean getRetryable() { return retryable; }
+    public void setRetryable(Boolean retryable) { this.retryable = retryable; }
+
+    public AdvanceFallback getFallback() { return fallback; }
+    public void setFallback(AdvanceFallback fallback) { this.fallback = fallback; }
 
     public String getSessionId() { return sessionId; }
     public void setSessionId(String sessionId) { this.sessionId = sessionId; }
@@ -137,7 +179,14 @@ public class AdvanceSessionResponse {
         public SandboxData() {
         }
 
+        @SerializedName("autoPass")
+        private Boolean autoPass;
+
         public String getOtpCode() { return otpCode; }
         public void setOtpCode(String otpCode) { this.otpCode = otpCode; }
+
+        /** The biometric step will be approved automatically. */
+        public Boolean getAutoPass() { return autoPass; }
+        public void setAutoPass(Boolean autoPass) { this.autoPass = autoPass; }
     }
 }

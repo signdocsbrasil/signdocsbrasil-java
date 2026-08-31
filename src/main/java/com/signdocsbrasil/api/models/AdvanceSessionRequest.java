@@ -32,6 +32,38 @@ public class AdvanceSessionRequest {
     @SerializedName("geolocation")
     private Geolocation geolocation;
 
+    /** CPF or CNPJ the signer types to confirm their identity ({@code confirm_signer}). */
+    @SerializedName("cpfCnpj")
+    private String cpfCnpj;
+
+    /** Base64 identity-document photo, max 5MB ({@code complete_document_photo}). */
+    @SerializedName("documentImage")
+    private String documentImage;
+
+    @SerializedName("documentType")
+    private String documentType;
+
+    /**
+     * Sandbox-only simulated scores, so a rejection can be rehearsed. Read only
+     * once the step already resolved to sandbox — they can never make a real
+     * verification pass. Boxed so an unset score is omitted rather than sent as
+     * 0, which is a meaningful value here.
+     */
+    @SerializedName("sandboxSimilarity")
+    private Double sandboxSimilarity;
+
+    @SerializedName("sandboxLivenessConfidence")
+    private Double sandboxLivenessConfidence;
+
+    @SerializedName("sandboxBrightness")
+    private Double sandboxBrightness;
+
+    @SerializedName("sandboxSharpness")
+    private Double sandboxSharpness;
+
+    @SerializedName("deviceInfo")
+    private DeviceInfo deviceInfo;
+
     public AdvanceSessionRequest() {
     }
 
@@ -134,5 +166,69 @@ public class AdvanceSessionRequest {
 
         public String getSource() { return source; }
         public void setSource(String source) { this.source = source; }
+    }
+
+    public String getCpfCnpj() {
+        return cpfCnpj;
+    }
+
+    public void setCpfCnpj(String cpfCnpj) {
+        this.cpfCnpj = cpfCnpj;
+    }
+
+    public String getDocumentImage() {
+        return documentImage;
+    }
+
+    public void setDocumentImage(String documentImage) {
+        this.documentImage = documentImage;
+    }
+
+    public String getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(String documentType) {
+        this.documentType = documentType;
+    }
+
+    public Double getSandboxSimilarity() {
+        return sandboxSimilarity;
+    }
+
+    public void setSandboxSimilarity(Double sandboxSimilarity) {
+        this.sandboxSimilarity = sandboxSimilarity;
+    }
+
+    public Double getSandboxLivenessConfidence() {
+        return sandboxLivenessConfidence;
+    }
+
+    public void setSandboxLivenessConfidence(Double sandboxLivenessConfidence) {
+        this.sandboxLivenessConfidence = sandboxLivenessConfidence;
+    }
+
+    public Double getSandboxBrightness() {
+        return sandboxBrightness;
+    }
+
+    public void setSandboxBrightness(Double sandboxBrightness) {
+        this.sandboxBrightness = sandboxBrightness;
+    }
+
+    public Double getSandboxSharpness() {
+        return sandboxSharpness;
+    }
+
+    public void setSandboxSharpness(Double sandboxSharpness) {
+        this.sandboxSharpness = sandboxSharpness;
+    }
+
+    public DeviceInfo getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(DeviceInfo deviceInfo) {
+        this.deviceInfo = deviceInfo;
     }
 }
