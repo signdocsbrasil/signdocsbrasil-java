@@ -5,6 +5,7 @@ import com.signdocsbrasil.api.models.EnrollUserRequest;
 import com.signdocsbrasil.api.models.EnrollUserResponse;
 import com.signdocsbrasil.api.models.EnrollmentStatusResponse;
 import com.signdocsbrasil.api.models.DeleteEnrollmentResponse;
+import com.signdocsbrasil.api.models.BatchEnrollmentModels;
 
 import java.time.Duration;
 
@@ -96,5 +97,35 @@ public final class UsersResource {
     public DeleteEnrollmentResponse deleteEnrollment(String userExternalId, Duration timeout) {
         return http.request("DELETE", "/v1/users/" + userExternalId + "/enrollment",
                 null, DeleteEnrollmentResponse.class, timeout);
+    }
+
+    /**
+     * Enrols up to 25 users in one request.
+     *
+     * <p>The documented cap is 25 rows, but the binding limit is the request
+     * body — roughly 6MB, and base64 inflates each photo by a third. Keep
+     * photos under ~175KB (640x640 is ample) to use all 25 slots.
+     *
+     * <p>Set {@code dryRun} on the request to inspect the photos without
+     * storing anything.
+     *
+     * @param request the rows to enrol
+     * @return per-row outcomes; read them rather than the HTTP status
+     */
+    public BatchEnrollmentModels.Response enrollBatch(BatchEnrollmentModels.Request request) {
+        return http.request("POST", "/v1/users/enrollments",
+                request, BatchEnrollmentModels.Response.class);
+    }
+
+    /**
+     * Enrols a batch with a per-request timeout.
+     *
+     * @param request the rows to enrol
+     * @param timeout the request timeout
+     * @return per-row outcomes
+     */
+    public BatchEnrollmentModels.Response enrollBatch(BatchEnrollmentModels.Request request, Duration timeout) {
+        return http.request("POST", "/v1/users/enrollments",
+                request, BatchEnrollmentModels.Response.class, timeout);
     }
 }
