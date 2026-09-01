@@ -135,4 +135,17 @@ public class EnrollUserResponse {
     public BatchEnrollmentModels.Pose getPose() { return pose; }
     public Double getFaceCoverage() { return faceCoverage; }
     public java.util.List<String> getWarnings() { return warnings; }
+    /**
+     * Whether the photo works as a reference: {@code usable}, {@code marginal}
+     * or {@code rejected}. Read this rather than deriving it from the warnings.
+     *
+     * <p>Deliberately not {@code status}: on a batch row {@code status} says
+     * what happened to the write ({@code enrolled}/{@code failed}), a different
+     * question. A poor photo that stored fine is {@code status: enrolled} with
+     * {@code referenceQuality: marginal} — the combination worth acting on.
+     */
+    @SerializedName("referenceQuality")
+    private String referenceQuality;
+
+    public String getReferenceQuality() { return referenceQuality; }
 }

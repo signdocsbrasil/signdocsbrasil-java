@@ -39,6 +39,10 @@ public class InspectEnrollmentResponse {
     @SerializedName("warnings")
     private List<String> warnings;
 
+    /** Same field a real enrolment returns. In a dry run it equals the status. */
+    @SerializedName("referenceQuality")
+    private String referenceQuality;
+
     public InspectEnrollmentResponse() {
     }
 
@@ -51,6 +55,7 @@ public class InspectEnrollmentResponse {
     public BatchEnrollmentModels.Pose getPose() { return pose; }
     public Double getFaceCoverage() { return faceCoverage; }
     public List<String> getWarnings() { return warnings; }
+    public String getReferenceQuality() { return referenceQuality; }
 
     @Override
     public String toString() {

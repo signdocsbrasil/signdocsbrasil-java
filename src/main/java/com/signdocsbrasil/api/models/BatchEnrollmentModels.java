@@ -164,9 +164,17 @@ public final class BatchEnrollmentModels {
         @SerializedName("faceCoverage")
         private Double faceCoverage;
 
-        /** Empty on a clean photo. Dry run only. */
+        /** Empty on a clean photo. */
         @SerializedName("warnings")
         private List<String> warnings;
+
+        /**
+         * Whether the photo works as a reference. Separate from {@code status},
+         * which says what happened to the write: a row can be
+         * {@code status: enrolled} with {@code referenceQuality: marginal}.
+         */
+        @SerializedName("referenceQuality")
+        private String referenceQuality;
 
         public Integer getIndex() { return index; }
         public String getUserExternalId() { return userExternalId; }
@@ -179,6 +187,7 @@ public final class BatchEnrollmentModels {
         public Pose getPose() { return pose; }
         public Double getFaceCoverage() { return faceCoverage; }
         public List<String> getWarnings() { return warnings; }
+        public String getReferenceQuality() { return referenceQuality; }
     }
 
     /**
