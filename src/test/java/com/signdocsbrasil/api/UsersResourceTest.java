@@ -3,6 +3,8 @@ package com.signdocsbrasil.api;
 import com.signdocsbrasil.api.models.BatchEnrollmentModels;
 import com.signdocsbrasil.api.models.DeleteEnrollmentResponse;
 import com.signdocsbrasil.api.models.EnrollmentStatusResponse;
+import com.signdocsbrasil.api.models.EnrollUserRequest;
+import com.signdocsbrasil.api.models.InspectEnrollmentResponse;
 import com.signdocsbrasil.api.resources.UsersResource;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -145,5 +147,35 @@ class UsersResourceTest {
         assertEquals(1, res.getMarginal());
         assertTrue(res.getResults().get(1).getWarnings()
                 .contains(BatchEnrollmentModels.WARNING_LOW_BRIGHTNESS));
+    }
+
+    @Test
+    void inspectSendsDryRunAndReturnsTheVerdict() throws Exception {
+        enqueueToken();
+        enqueueJson("{\"dryRun\":true,\"userExternalId\":\"a\",\"status\":\"marginal\","
+                + "\"faceConfidence\":99.99,"
+                + "\"quality\":{\"brightness\":15.0,\"sharpness\":13.0},"
+                + "\"faceCoverage\":0.42,"
+                + "\"warnings\":[\"LOW_BRIGHTNESS\",\"LOW_SHARPNESS\"]}");
+
+        EnrollUserRequest request = new EnrollUserRequest();
+        request.setImage("aW1n");
+        request.setCpf("11144477735");
+
+        InspectEnrollmentResponse res = resource().inspect("a", request);
+
+        server.takeRequest();
+        RecordedRequest req = server.takeRequest();
+        assertEquals("PUT", req.getMethod());
+        assertTrue(req.getBody().readUtf8().contains("\"dryRun\":true"));
+
+        // The trap this whole feature exists for: detection confidence is ~100
+        // while the photo is a poor reference.
+        assertEquals("marginal", res.getStatus());
+        assertEquals(99.99, res.getFaceConfidence(), 0.001);
+        assertEquals(15.0, res.getQuality().getBrightness(), 0.001);
+        assertEquals(0.42, res.getFaceCoverage(), 0.001);
+        assertTrue(res.getWarnings().contains(BatchEnrollmentModels.WARNING_LOW_BRIGHTNESS));
+        assertEquals(Boolean.TRUE, res.getDryRun());
     }
 }

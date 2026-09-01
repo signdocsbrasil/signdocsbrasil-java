@@ -54,4 +54,15 @@ public class EnrollUserRequest {
     public void setSource(String source) {
         this.source = source;
     }
+
+    /**
+     * Inspect without writing. Returns the same verdict the batch endpoint
+     * gives and persists nothing — no image, no record, and the 90-day
+     * retention clock never starts.
+     */
+    @SerializedName("dryRun")
+    private Boolean dryRun;
+
+    public Boolean getDryRun() { return dryRun; }
+    public void setDryRun(Boolean dryRun) { this.dryRun = dryRun; }
 }

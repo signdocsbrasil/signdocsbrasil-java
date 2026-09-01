@@ -6,6 +6,7 @@ import com.signdocsbrasil.api.models.EnrollUserResponse;
 import com.signdocsbrasil.api.models.EnrollmentStatusResponse;
 import com.signdocsbrasil.api.models.DeleteEnrollmentResponse;
 import com.signdocsbrasil.api.models.BatchEnrollmentModels;
+import com.signdocsbrasil.api.models.InspectEnrollmentResponse;
 
 import java.time.Duration;
 
@@ -127,5 +128,22 @@ public final class UsersResource {
     public BatchEnrollmentModels.Response enrollBatch(BatchEnrollmentModels.Request request, Duration timeout) {
         return http.request("POST", "/v1/users/enrollments",
                 request, BatchEnrollmentModels.Response.class, timeout);
+    }
+
+    /**
+     * Inspects one candidate photo without storing it.
+     *
+     * <p>Same verdict the batch endpoint returns, from the same code — a photo
+     * must not be judged differently depending on which endpoint you asked.
+     * Nothing is persisted and the 90-day retention clock never starts.
+     *
+     * @param userExternalId the external user ID
+     * @param request        the candidate photo; dryRun is set for you
+     * @return the verdict and capture metrics
+     */
+    public InspectEnrollmentResponse inspect(String userExternalId, EnrollUserRequest request) {
+        request.setDryRun(true);
+        return http.request("PUT", "/v1/users/" + userExternalId + "/enrollment",
+                request, InspectEnrollmentResponse.class);
     }
 }
