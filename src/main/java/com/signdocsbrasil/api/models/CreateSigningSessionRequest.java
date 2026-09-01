@@ -53,7 +53,19 @@ public class CreateSigningSessionRequest {
     @SerializedName("owner")
     private Owner owner;
 
+    /** See {@link ReferenceImage}. */
+    @SerializedName("referenceImage")
+    private ReferenceImage referenceImage;
+
     public CreateSigningSessionRequest() {
+    }
+
+    public ReferenceImage getReferenceImage() {
+        return referenceImage;
+    }
+
+    public void setReferenceImage(ReferenceImage referenceImage) {
+        this.referenceImage = referenceImage;
     }
 
     public String getPurpose() {
@@ -150,6 +162,35 @@ public class CreateSigningSessionRequest {
 
     public void setOwner(Owner owner) {
         this.owner = owner;
+    }
+
+    /**
+     * Biometric reference image for this session, base64 JPEG, max 5MB.
+     *
+     * <p>Decides which face the {@code BIOMETRIC_MATCH} step compares the
+     * captured liveness against. When set, this image takes precedence over
+     * the user's stored enrolment — which is what lets a session be signed by
+     * someone who was never enrolled.
+     */
+    public static class ReferenceImage {
+
+        @SerializedName("content")
+        private String content;
+
+        public ReferenceImage() {
+        }
+
+        public ReferenceImage(String content) {
+            this.content = content;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
     }
 
     /**
