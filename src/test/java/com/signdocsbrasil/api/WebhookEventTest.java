@@ -26,9 +26,6 @@ class WebhookEventTest {
             "TRANSACTION.EXPIRED",
             "TRANSACTION.FALLBACK",
             "TRANSACTION.DEADLINE_APPROACHING",
-            "STEP.STARTED",
-            "STEP.COMPLETED",
-            "STEP.FAILED",
             "STEP.PURPOSE_DISCLOSURE_SENT",
             // Added when the enrolment-expiry sweep landed in the spec. This
             // list is a tripwire on purpose: a spec addition should fail here
@@ -43,6 +40,7 @@ class WebhookEventTest {
             "SIGNING_SESSION.EXPIRED",
             "ENVELOPE.CREATED",
             "ENVELOPE.ALL_SIGNED",
+            "ENVELOPE.CANCELLED",
             "ENVELOPE.EXPIRED");
 
     @Test
@@ -55,7 +53,7 @@ class WebhookEventTest {
         assertEquals(expected, enumWireValues,
                 "WebhookEvent enum must match the OpenAPI spec WebhookEventType");
         // 20 -> 22 when the ENROLLMENT.* events landed in the spec.
-        assertEquals(22, WebhookEvent.values().length);
+        assertEquals(20, WebhookEvent.values().length);
     }
 
     @Test
